@@ -1,0 +1,22 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Run merge_ieee_subjects.py",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/merge_ieee_subjects.py",
+      "console": "integratedTerminal",
+      "args": [
+        "--usage", "usage.xlsx",
+        "--kbart", "IEEEXplore_Global_IEL.xlsx",
+        "--kbart-sheet", "Kbart Data",
+        "--sample-rows", "20",
+        "--out-prefix", "usage",
+        "-v"
+      ],
+      "cwd": "${workspaceFolder}",
+      "justMyCode": true
+    }
+  ]
+}

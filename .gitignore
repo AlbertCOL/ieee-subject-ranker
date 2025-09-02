@@ -1,0 +1,27 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# VS Code
+.vscode/*.log
+*.code-workspace
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Generated artifacts
+gui_runs/
+*.xlsx
+*.xls
+*.csv
+*.parquet
+*.md
+run.log
+run_info.json
+data_issues.csv
+.kbart_*_tbl.parquet
+
+# Streamlit
+.streamlit/
