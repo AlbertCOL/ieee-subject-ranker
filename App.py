@@ -263,4 +263,3 @@ if run_it:
         for f in outputs:
             download_button_for_file(f, label_prefix="Download")
 
-st.markdown('<div class="foot">Tip: install dependencies first: <code>pip install -r requirements.txt</code> (include <code>streamlit</code>).</div>', unsafe_allow_html=True)
