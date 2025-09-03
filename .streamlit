@@ -1,0 +1,8 @@
+[server]
+headless = true
+# These two are often necessary when embedding from a different domain (like WordPress):
+enableCORS = false
+enableXsrfProtection = false
+
+[browser]
+gatherUsageStats = false
