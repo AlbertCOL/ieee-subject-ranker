@@ -4,6 +4,7 @@ import sys
 import time
 import shutil
 import subprocess
+import platform
 from datetime import datetime
 from pathlib import Path
 
@@ -16,14 +17,24 @@ st.set_page_config(
     layout="wide",
 )
 
+# --- Branded header ---
+st.markdown("""
+<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+  <img src="https://contentonline.com/wp-content/uploads/2025/06/cropped-Hogupplost.jpg"
+       alt="Content Online" style="height:40px;">
+  <div style="font-size:1.4rem;font-weight:600;">IEEE Subject Ranker</div>
+</div>
+""", unsafe_allow_html=True)
+
+# --- Styles ---
 st.markdown(
     """
     <style>
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
-    <img src="https://contentonline.com/wp-content/uploads/2025/06/cropped-Hogupplost.jpg"
-    style="height:40px;">
-    <div style="font-size:1.4rem;font-weight:600;">IEEE Subject Ranker</div>
-    </div>
+    .small { font-size: 0.85rem; color: #666; }
+    .ok { color: #0a7; font-weight: 600; }
+    .warn { color: #c77; font-weight: 600; }
+    .muted { color: #888; }
+    .foot { font-size: 0.85rem; color: #777; margin-top: 1rem; }
     </style>
     """,
     unsafe_allow_html=True
@@ -34,6 +45,23 @@ BASE = Path.cwd()
 SCRIPT = BASE / "merge_ieee_subjects.py"
 DEFAULT_USAGE = BASE / "usage.xlsx"
 DEFAULT_KBART = BASE / "IEEEXplore_Global_IEL.xlsx"
+
+def _decode_best_effort(b: bytes) -> str:
+    """
+    Decode bytes using a safe, cross-platform strategy:
+    try utf-8, utf-8-sig, mbcs (Windows), cp1252, then latin-1,
+    and finally utf-8 with replacement to avoid crashes.
+    """
+    encodings = ["utf-8", "utf-8-sig"]
+    if platform.system().lower().startswith("win"):
+        encodings.append("mbcs")
+    encodings += ["cp1252", "latin-1"]
+    for enc in encodings:
+        try:
+            return b.decode(enc)
+        except Exception:
+            continue
+    return b.decode("utf-8", errors="replace")
 
 def write_uploaded(file_uploader, out_path: Path):
     if file_uploader is None:
@@ -188,7 +216,7 @@ if run_it:
     st.markdown("**Command:**")
     st.code(" ".join(cmd), language="bash")
 
-    # Run process
+    # Run process (capture BYTES, then decode robustly)
     with st.status("Running script…", expanded=True) as status:
         try:
             proc = subprocess.run(
@@ -196,13 +224,12 @@ if run_it:
                 cwd=run_dir,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
-                text=True,
+                text=False,          # capture bytes
                 check=False,
-                encoding="utf-8",
-                errors="replace"
             )
+            out_text = _decode_best_effort(proc.stdout or b"")
             st.write("**Console output**")
-            st.code(proc.stdout or "(no output)", language="bash")
+            st.code(out_text if out_text.strip() else "(no output)", language="bash")
             if proc.returncode == 0:
                 st.markdown('<span class="ok">Finished successfully.</span>', unsafe_allow_html=True)
                 status.update(label="Done", state="complete")
@@ -216,12 +243,14 @@ if run_it:
     # Remember last run dir
     latest_link.write_text(str(run_dir), encoding="utf-8")
 
-    # Show run.log if present
+    # Show run.log if present (read as bytes and decode robustly)
     log_path = run_dir / "run.log"
     if log_path.exists():
         st.subheader("Run log")
         try:
-            st.code(log_path.read_text(encoding="utf-8")[-10000:], language="log")
+            raw = log_path.read_bytes()
+            decoded = _decode_best_effort(raw)
+            st.code(decoded[-10000:], language="log")
         except Exception:
             st.code("(could not read run.log)")
 
@@ -234,4 +263,4 @@ if run_it:
         for f in outputs:
             download_button_for_file(f, label_prefix="Download")
 
-st.markdown('<div class="foot">Tip: install dependencies first: <code>pip install -r requirements.txt</code> (add <code>streamlit</code> too).</div>', unsafe_allow_html=True)
+st.markdown('<div class="foot">Tip: install dependencies first: <code>pip install -r requirements.txt</code> (include <code>streamlit</code>).</div>', unsafe_allow_html=True)
