@@ -16,13 +16,17 @@ st.set_page_config(
     layout="wide",
 )
 
-st.markdown("""
-<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
-  <img src="https://www.contentonline.com/wp-content/uploads/2020/07/cropped-ContentOnline-Logo.png"
-       style="height:40px;">
-  <div style="font-size:1.4rem;font-weight:600;">IEEE Subject Ranker</div>
-</div>
-""", unsafe_allow_html=True)
+st.markdown(
+    """
+    <style>
+    .small { font-size: 0.85rem; color: #666; }
+    .ok { color: #0a7; font-weight: 600; }
+    .warn { color: #c77; font-weight: 600; }
+    .muted { color: #888; }
+    .foot { font-size: 0.85rem; color: #777; margin-top: 1rem; }
+    </style>
+    """,
+    unsafe_allow_html=True
 )
 
 # --- Paths & helpers ---
