@@ -355,13 +355,17 @@ def attach_subjects_vectorized(
     missing = df[subject_cols].isna().all(axis=1)
     if missing.any():
         pre_fill_mask = missing.copy()
-        fill = df.loc[missing, ["__norm_title"]].merge(kbart_title_tbl, on="__norm_title", how="left")
+        fill = (
+            df.loc[missing, ["__norm_title"]]
+            .reset_index()
+            .merge(kbart_title_tbl, on="__norm_title", how="left")
+            .set_index("index")
+        )
         got_title = pd.Series(False, index=df.index)
         for c in subject_cols:
-            new_vals = fill[c]
-            fill_mask = df.loc[missing, c].isna() & new_vals.notna()
+            fill_mask = df.loc[missing, c].isna() & fill[c].notna()
             idxs = df.loc[missing].index[fill_mask]
-            df.loc[idxs, c] = new_vals[fill_mask].values
+            df.loc[idxs, c] = fill.loc[fill_mask, c].values
             got_title.loc[idxs] = True
         df.loc[got_title & pre_fill_mask & df["Matched_By"].isna(), "Matched_By"] = "Title"
 
