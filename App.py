@@ -41,7 +41,7 @@ st.markdown(
 )
 
 # --- Paths & helpers ---
-BASE = Path.cwd()
+BASE = Path(__file__).resolve().parent
 SCRIPT = BASE / "merge_ieee_subjects.py"
 DEFAULT_USAGE = BASE / "usage.xlsx"
 DEFAULT_KBART = BASE / "IEEEXplore_Global_IEL.xlsx"
