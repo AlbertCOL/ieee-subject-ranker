@@ -217,7 +217,15 @@ def load_usage_any(usage_path: Path) -> pd.DataFrame:
     if suffix == ".csv":
         return pd.read_csv(usage_path)
     if suffix == ".parquet":
-        return pd.read_parquet(usage_path)
+        try:
+            return pd.read_parquet(usage_path)
+        except ImportError:
+            msg = (
+                "Parquet support requires optional dependency 'pyarrow' or 'fastparquet'."
+                " Please install one of them to load parquet files."
+            )
+            log.error(msg)
+            fail("Parquet engine unavailable")
     # default to Excel attempt
     return load_usage_autodetect_excel(usage_path)
 
